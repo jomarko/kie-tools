@@ -16,20 +16,12 @@
 
 import * as React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Text,
-  TextContent,
-  TextList,
-  TextListItem,
-  TextListItemVariants,
-  TextListVariants,
-  TextVariants,
-} from "@patternfly/react-core/dist/js/components/Text";
 import { Modal } from "@patternfly/react-core/dist/js/components/Modal";
 import { KeyboardIcon } from "@patternfly/react-icons/dist/js/icons/keyboard-icon";
 import { OperatingSystem } from "@kie-tooling-core/operating-system";
 import { useKogitoEditorEnvelopeContext } from "../../api";
 import { useEditorEnvelopeI18nContext } from "../i18n";
+import { Cheetsheet } from "../Cheetsheet";
 
 export function KeyBindingsHelpOverlay() {
   const [showing, setShowing] = useState(false);
@@ -98,23 +90,37 @@ export function KeyBindingsHelpOverlay() {
         data-testid={"keyboard-shortcuts-help-overlay"}
         className={"kogito-tooling--keyboard-shortcuts"}
       >
-        <TextContent>
-          <TextList component={TextListVariants.dl}>
-            {Array.from(keyBindings.keys()).map((category) => (
-              <React.Fragment key={category}>
-                <Text component={TextVariants.h2}>{category}</Text>
-                {Array.from(keyBindings.get(category)!).map((keyBinding) => (
-                  <React.Fragment key={keyBinding.combination}>
-                    <TextListItem component={TextListItemVariants.dt}>
-                      {formatKeyBindingCombination(keyBinding.combination)}
-                    </TextListItem>
-                    <TextListItem component={TextListItemVariants.dd}>{keyBinding.label}</TextListItem>
-                  </React.Fragment>
-                ))}
-              </React.Fragment>
-            ))}
-          </TextList>
-        </TextContent>
+        <Cheetsheet
+          keyBindings={keyBindings}
+          feelFunctions={
+            new Map([
+              ["date", new Set([{ signature: "today()", documentation: "Returns the actual date." }])],
+              [
+                "number",
+                new Set([
+                  {
+                    signature: "min([list])",
+                    documentation: "Returns the element from the 'list' with minimal value.",
+                  },
+                  {
+                    signature: "max([list])",
+                    documentation: "Returns the element from the 'list' with maximal value.",
+                  },
+                ]),
+              ],
+              [
+                "string",
+                new Set([
+                  {
+                    signature: "substring(text, index)",
+                    documentation:
+                      "Returns a substring of the 'text' starting at 'index'. First letter of 'text' has index 1.",
+                  },
+                ]),
+              ],
+            ])
+          }
+        />
       </Modal>
     </>
   );
@@ -132,11 +138,4 @@ function removeDuplicatesByAttr<T>(myArr: T[], prop: keyof T) {
   return myArr.filter((obj, pos, arr) => {
     return arr.map((mapObj) => mapObj[prop]).indexOf(obj[prop]) === pos;
   });
-}
-
-function formatKeyBindingCombination(combination: string) {
-  return combination
-    .split("+")
-    .map((w) => w.replace(/^\w/, (c) => c.toUpperCase()))
-    .join(" + ");
 }
