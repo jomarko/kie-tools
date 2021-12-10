@@ -1,0 +1,55 @@
+name: "DMN Editor load time tests"
+on:
+  push:
+    branches:
+      - cypress-github-action
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: "Set up GOLANG 1.16"
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.16"
+
+      - name: "Setup node"
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: "Setup environment"
+        uses: ./.github/actions/setup-env
+        with:
+          os: "ubuntu-latest"
+
+      - name: "Bootstrap kogito-tooling"
+        shell: bash
+        run: lerna bootstrap
+
+      - name: "Build online-editor and its dependencies"
+        shell: bash
+        run: lerna run build:dev --scope @kogito-tooling/online-editor --include-dependencies
+
+      # Run Cypress tests
+      - name: "Run Online Editors tests"
+        uses: cypress-io/github-action@v2
+        with:
+          # all installed in previous step
+          install: false
+          working-directory: packages/online-editor
+          command: yarn run test:it
+
+        env:
+          DISPLAY: ":99.0"
+          KOGITO_TOOLING_BUILD_testIT: "true"
+          KOGITO_TOOLING_BUILD_recordIT: "true"
+          START_SERVER_AND_TEST_INSECURE: "true"
+          # pass the Dashboard record key as an environment variable
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # pass the project ID from the secrets through environment variable
+          CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}

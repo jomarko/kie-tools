@@ -37,6 +37,11 @@ const ENV_VARS = {
     default: `${false}`,
     description: "",
   },
+  KOGITO_TOOLING_BUILD_recordIT: {
+    name: "KOGITO_TOOLING_BUILD_recordIT",
+    default: `${false}`,
+    description: "",
+  },
   KOGITO_TOOLING_BUILD_docker: {
     name: "KOGITO_TOOLING_BUILD_docker",
     default: `${false}`,
@@ -197,6 +202,7 @@ module.exports = {
       lint: str2bool(getOrDefault(ENV_VARS.KOGITO_TOOLING_BUILD_lint)),
       test: str2bool(getOrDefault(ENV_VARS.KOGITO_TOOLING_BUILD_test)),
       testIT: str2bool(getOrDefault(ENV_VARS.KOGITO_TOOLING_BUILD_testIT)),
+      recordIT: str2bool(getOrDefault(ENV_VARS.KOGITO_TOOLING_BUILD_recordIT)),
       docker: str2bool(getOrDefault(ENV_VARS.KOGITO_TOOLING_BUILD_docker)),
       examples: str2bool(getOrDefault(ENV_VARS.KOGITO_TOOLING_BUILD_examples)),
     },
