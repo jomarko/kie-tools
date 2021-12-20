@@ -20,8 +20,6 @@ import org.kie.workbench.common.dmn.showcase.client.common.wait.WaitUtils;
 import org.kie.workbench.common.dmn.showcase.client.selenium.locator.CommonCSSLocator;
 import org.kie.workbench.common.dmn.showcase.client.selenium.locator.DecisionNavigatorXPathLocator;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class DecisionNavigator {
 
     private static final String NOT_PRESENT_IN_NAVIGATOR = "'%s' was not present in the decision navigator";
@@ -51,18 +49,6 @@ public class DecisionNavigator {
         waitUtils.waitUntilElementIsVisible(
                 item,
                 String.format(NOT_PRESENT_IN_NAVIGATOR, item.getXPathLocator()));
-    }
-
-    /**
-     * Asserts if expected amount of items match the provided locator
-     * @param item
-     * @param count
-     */
-    public void assertItemsMatch(final DecisionNavigatorXPathLocator item, final int count) {
-        assertThat(
-                waitUtils.waitUntilAllElementsAreVisible(item,
-                                                         String.format(NOT_PRESENT_IN_NAVIGATOR, item.getXPathLocator())))
-                .hasSize(count);
     }
 
     public void selectItem(final DecisionNavigatorXPathLocator item) {
