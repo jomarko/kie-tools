@@ -514,11 +514,12 @@ public class DMNEditorConstants {
     @TranslationKey(defaultValue = "")
     public static final String StructureTypesTooltipView_DescriptionIncluded = "StructureTypesTooltipView.DescriptionIncluded";
 
+    @TranslationKey(defaultValue = "")
     public static final String StructureTypesTooltipView_ViewDataType = "StructureTypesTooltipView.ViewDataType";
 
     @TranslationKey(defaultValue = "")
     public static final String AutomaticLayout_Label = "AutomaticLayout.Label";
 
     @TranslationKey(defaultValue = "")
-    public static String AutomaticLayout_DiagramDoesNotHaveLayout = "AutomaticLayout.DiagramDoesNotHaveLayout";
+    public static final String AutomaticLayout_DiagramDoesNotHaveLayout = "AutomaticLayout.DiagramDoesNotHaveLayout";
 }
