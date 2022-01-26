@@ -514,7 +514,6 @@ public class DMNEditorConstants {
     @TranslationKey(defaultValue = "")
     public static final String StructureTypesTooltipView_DescriptionIncluded = "StructureTypesTooltipView.DescriptionIncluded";
 
-    @TranslationKey(defaultValue = "")
     public static final String StructureTypesTooltipView_ViewDataType = "StructureTypesTooltipView.ViewDataType";
 
     @TranslationKey(defaultValue = "")
