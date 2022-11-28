@@ -628,6 +628,13 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${version.surefire.plugin}</version>
           <configuration>
+            <!-- JDK 17 support -->>
+            <argLine>
+                --add-opens java.base/java.lang=ALL-UNNAMED
+                --add-opens java.base/java.time=ALL-UNNAMED
+                --add-opens java.base/java.time.format=ALL-UNNAMED
+                --add-opens java.base/java.util=ALL-UNNAMED
+            </argLine>
             <trimStackTrace>false</trimStackTrace>
             <systemPropertyVariables>
               <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
