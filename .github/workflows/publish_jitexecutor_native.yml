@@ -34,11 +34,11 @@ jobs:
         with:
           maven-version: 3.8.6
 
-      - name: "Set up JDK 11"
+      - name: "Set up JDK 17"
         if: runner.os != 'Windows'
         uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc
         with:
-          java-version: "11"
+          java-version: "17"
           distribution: "zulu"
 
       - name: "Set long paths for Windows"
