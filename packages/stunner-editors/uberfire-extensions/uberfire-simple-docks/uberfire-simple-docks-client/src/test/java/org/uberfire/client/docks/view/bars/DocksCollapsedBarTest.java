@@ -29,7 +29,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(GwtMockitoTestRunner.class)
 public class DocksCollapsedBarTest {
@@ -39,14 +38,23 @@ public class DocksCollapsedBarTest {
     @Mock
     private Element elementMock;
 
-    @Mock
     private UberfireDockPosition dockPositionMock;
 
     private DocksCollapsedBar docksCollapsedBar;
 
     @Before
     public void setUp() throws Exception {
-        when(dockPositionMock.getShortName()).thenReturn(POSITION_SHORT_NAME);
+        dockPositionMock = new UberfireDockPosition() {
+            @Override
+            public boolean allowSingleDockItem() {
+                return false;
+            }
+
+            @Override
+            public String getShortName() {
+                return POSITION_SHORT_NAME;
+            }
+        };
 
         docksCollapsedBar = spy(new DocksCollapsedBar(dockPositionMock));
 
