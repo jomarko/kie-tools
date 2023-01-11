@@ -175,7 +175,7 @@ const RefForwardingEmbeddedEditor: React.ForwardRefRenderFunction<EmbeddedEditor
             { path, content },
             { showLoadingOverlay: false }
           ),
-        validate: () => envelopeServer.envelopeApi.requests.kogitoEditor_validate(),
+        // validate: () => envelopeServer.envelopeApi.requests.kogitoEditor_validate(),
         setTheme: (theme) => Promise.resolve(envelopeServer.shared.kogitoEditor_theme.set(theme)),
       };
     },

@@ -294,14 +294,14 @@ export function EditorPage(props: Props) {
 
     //FIXME: Removing this timeout makes the notifications not work some times. Need to investigate.
     setTimeout(() => {
-      editor?.validate().then((notifications) => {
-        editorPageDock?.setNotifications(
-          i18n.terms.validation,
-          "",
-          // Removing the notification path so that we don't group it by path, as we're only validating one file.
-          Array.isArray(notifications) ? notifications.map((n) => ({ ...n, path: "" })) : []
-        );
-      });
+      // editor?.validate().then((notifications) => {
+      //   editorPageDock?.setNotifications(
+      //     i18n.terms.validation,
+      //     "",
+      //     // Removing the notification path so that we don't group it by path, as we're only validating one file.
+      //     Array.isArray(notifications) ? notifications.map((n) => ({ ...n, path: "" })) : []
+      //   );
+      // });
     }, 200);
   }, [workspaceFilePromise, editor, i18n, editorPageDock]);
 

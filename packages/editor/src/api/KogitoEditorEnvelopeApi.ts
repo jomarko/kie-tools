@@ -51,5 +51,5 @@ export interface KogitoEditorEnvelopeApi extends KeyboardShortcutsEnvelopeApi, G
   kogitoEditor_initRequest(association: Association, editorInit: EditorInitArgs): Promise<void>;
   kogitoEditor_contentRequest(): Promise<EditorContent>;
   kogitoEditor_previewRequest(): Promise<string>;
-  kogitoEditor_validate(): Promise<Notification[]>;
+  // kogitoEditor_validate(): Promise<Notification[]>;
 }

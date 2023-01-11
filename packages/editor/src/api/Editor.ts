@@ -41,7 +41,6 @@ export interface EditorApi {
   getElementPosition(selector: string): Promise<Rect | undefined>;
   undo(): Promise<void>;
   redo(): Promise<void>;
-  validate(): Promise<Notification[]>;
   setTheme(theme: EditorTheme): Promise<void>;
   selectStateByName?(name: string): Promise<void>;
 }

@@ -99,10 +99,6 @@ export class GwtEditorWrapper implements Editor {
     return this.gwtEditor.getPreview();
   }
 
-  public validate(): Promise<Notification[]> {
-    return this.gwtEditor.validate();
-  }
-
   public setTheme(theme: EditorTheme): Promise<void> {
     // Only default theme is supported
     return Promise.resolve();

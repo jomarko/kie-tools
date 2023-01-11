@@ -142,9 +142,9 @@ export class KogitoEditorEnvelopeApiImpl<
     return this.args.envelopeContext.services.i18n.executeOnLocaleChangeSubscriptions(locale);
   }
 
-  public kogitoEditor_validate() {
-    return this.editor.validate();
-  }
+  // public kogitoEditor_validate() {
+  //   return this.editor.validate();
+  // }
 
   private setupI18n(initArgs: EditorInitArgs) {
     this.i18n.setLocale(initArgs.initialLocale);
