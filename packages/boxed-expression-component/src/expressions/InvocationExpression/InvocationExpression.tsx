@@ -227,6 +227,7 @@ export function InvocationExpression(invocationExpression: InvocationExpressionD
           { name: i18n.rowOperations.insertAbove, type: BeeTableOperation.RowInsertAbove },
           { name: i18n.rowOperations.insertBelow, type: BeeTableOperation.RowInsertBelow },
           { name: i18n.rowOperations.delete, type: BeeTableOperation.RowDelete },
+          { name: i18n.rowOperations.duplicate, type: BeeTableOperation.RowDuplicate },
         ],
       },
       {
@@ -329,35 +330,7 @@ export function InvocationExpression(invocationExpression: InvocationExpressionD
         return [];
       }
 
-      const columnIndex = selectionStart.columnIndex;
-
-      const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
-        ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
-        : true;
-
-      const columnCanBeDeleted =
-        columnIndex > 0 &&
-        atLeastTwoColumnsOfTheSameGroupType &&
-        (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
-        (column?.columns?.length ?? 0) <= 0;
-
-      const columnOperations =
-        columnIndex === 0 // This is the rowIndex column
-          ? []
-          : [
-              BeeTableOperation.ColumnInsertLeft,
-              BeeTableOperation.ColumnInsertRight,
-              ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
-            ];
-
       return [
-        ...columnOperations,
-        ...[
-          BeeTableOperation.SelectionCopy,
-          BeeTableOperation.SelectionCut,
-          BeeTableOperation.SelectionPaste,
-          BeeTableOperation.SelectionReset,
-        ],
         ...(selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.RowInsertAbove,
