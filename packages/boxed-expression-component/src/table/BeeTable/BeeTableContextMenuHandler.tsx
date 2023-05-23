@@ -26,7 +26,11 @@ import { useCustomContextMenuHandler } from "../../contextMenu/Hooks";
 import { useBoxedExpressionEditor } from "../../expressions/BoxedExpressionEditor/BoxedExpressionEditorContext";
 import { assertUnreachable } from "../../expressions/ExpressionDefinitionRoot/ExpressionDefinitionLogicTypeSelector";
 import "./BeeTableContextMenuHandler.css";
-import { useBeeTableSelection, useBeeTableSelectionDispatch } from "../../selection/BeeTableSelectionContext";
+import {
+  BeeTableSelectionActiveCell,
+  useBeeTableSelection,
+  useBeeTableSelectionDispatch,
+} from "../../selection/BeeTableSelectionContext";
 import * as ReactTable from "react-table";
 import * as _ from "lodash";
 import CutIcon from "@patternfly/react-icons/dist/js/icons/cut-icon";
@@ -38,6 +42,13 @@ import { useBoxedExpressionEditorI18n } from "../../i18n";
 export interface BeeTableContextMenuHandlerProps {
   tableRef: React.RefObject<HTMLDivElement | null>;
   operationConfig: BeeTableOperationConfig | undefined;
+  allowedOperations: (
+    selectionStart: BeeTableSelectionActiveCell | undefined,
+    selectionEnd: BeeTableSelectionActiveCell | undefined,
+    reactTableInstanceRowsLength: number,
+    column: ReactTable.ColumnInstance<any> | undefined,
+    columns: ReactTable.ColumnInstance<any>[] | undefined
+  ) => BeeTableOperation[];
   reactTableInstance: ReactTable.TableInstance<any>;
   //
   onRowAdded?: (args: { beforeIndex: number }) => void;
@@ -51,6 +62,7 @@ export interface BeeTableContextMenuHandlerProps {
 export function BeeTableContextMenuHandler({
   tableRef,
   operationConfig,
+  allowedOperations,
   reactTableInstance,
   onRowAdded,
   onRowDuplicated,
@@ -62,7 +74,7 @@ export function BeeTableContextMenuHandler({
   const { i18n } = useBoxedExpressionEditorI18n();
   const { setCurrentlyOpenContextMenu } = useBoxedExpressionEditor();
 
-  const { activeCell } = useBeeTableSelection();
+  const { activeCell, selectionStart, selectionEnd } = useBeeTableSelection();
   const { copy, cut, paste, erase } = useBeeTableSelectionDispatch();
 
   const columns = useMemo(() => {
@@ -85,32 +97,6 @@ export function BeeTableContextMenuHandler({
     return columns?.[columnIndex];
   }, [activeCell, columns]);
 
-  const columnOperations = useMemo(() => {
-    if (!activeCell) {
-      return [];
-    }
-
-    const columnIndex = activeCell.columnIndex;
-
-    const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
-      ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
-      : true;
-
-    const columnCanBeDeleted =
-      columnIndex > 0 &&
-      atLeastTwoColumnsOfTheSameGroupType &&
-      (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
-      (column?.columns?.length ?? 0) <= 0;
-
-    return columnIndex === 0 // This is the rowIndex column
-      ? []
-      : [
-          BeeTableOperation.ColumnInsertLeft,
-          BeeTableOperation.ColumnInsertRight,
-          ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
-        ];
-  }, [activeCell, column, columns]);
-
   const operationGroups = useMemo(() => {
     if (!activeCell) {
       return [];
@@ -120,25 +106,6 @@ export function BeeTableContextMenuHandler({
     }
     return (operationConfig ?? {})[column?.groupType || ""];
   }, [activeCell, column?.groupType, operationConfig]);
-
-  const allowedOperations = useMemo(() => {
-    if (!activeCell) {
-      return [];
-    }
-
-    return [
-      ...columnOperations,
-      ...(activeCell.rowIndex >= 0
-        ? [
-            BeeTableOperation.RowInsertAbove,
-            BeeTableOperation.RowInsertBelow,
-            ...(reactTableInstance.rows.length > 1 ? [BeeTableOperation.RowDelete] : []),
-            BeeTableOperation.RowReset,
-            BeeTableOperation.RowDuplicate,
-          ]
-        : []),
-    ];
-  }, [activeCell, columnOperations, reactTableInstance.rows.length]);
 
   const operationLabel = useCallback(
     (operation: BeeTableOperation) => {
@@ -271,6 +238,10 @@ export function BeeTableContextMenuHandler({
     };
   }, [xPos, yPos]);
 
+  const reactTableInstanceRowsLength = useMemo(() => {
+    return reactTableInstance.rows.length;
+  }, [reactTableInstance.rows.length]);
+
   return (
     <>
       {isOpen && (
@@ -285,7 +256,16 @@ export function BeeTableContextMenuHandler({
                 <MenuGroup
                   label={group}
                   className={
-                    items.every((operation) => !allowedOperations.includes(operation.type))
+                    items.every(
+                      (operation) =>
+                        !allowedOperations(
+                          selectionStart,
+                          selectionEnd,
+                          reactTableInstanceRowsLength,
+                          column,
+                          columns
+                        ).includes(operation.type)
+                    )
                       ? "no-allowed-actions-in-group"
                       : ""
                   }
@@ -297,16 +277,30 @@ export function BeeTableContextMenuHandler({
                         data-ouia-component-id={"expression-table-context-menu-" + operation.name}
                         key={operation.type + group}
                         itemId={operation.type}
-                        isDisabled={!allowedOperations.includes(operation.type)}
+                        isDisabled={
+                          !allowedOperations(
+                            selectionStart,
+                            selectionEnd,
+                            reactTableInstanceRowsLength,
+                            column,
+                            columns
+                          ).includes(operation.type)
+                        }
                       >
                         {operationLabel(operation.type)}
                       </MenuItem>
                     ))}
                   </MenuList>
                 </MenuGroup>
-                {items.some((operation) => allowedOperations.includes(operation.type)) && (
-                  <Divider key={"divider-" + group} style={{ padding: "16px" }} />
-                )}
+                {items.some((operation) =>
+                  allowedOperations(
+                    selectionStart,
+                    selectionStart,
+                    reactTableInstanceRowsLength,
+                    column,
+                    columns
+                  ).includes(operation.type)
+                ) && <Divider key={"divider-" + group} style={{ padding: "16px" }} />}
               </React.Fragment>
             ))}
 

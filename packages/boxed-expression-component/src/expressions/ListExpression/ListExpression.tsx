@@ -42,6 +42,8 @@ import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import "./ListExpression.css";
 import { ListItemCell } from "./ListItemCell";
 import { ResizerStopBehavior } from "../../resizing/ResizingWidthsContext";
+import { BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
+import _ from "lodash";
 
 export type ROWTYPE = ContextExpressionDefinitionEntry;
 
@@ -181,6 +183,61 @@ export function ListExpression(listExpression: ListExpressionDefinition & { isNe
     [setExpression]
   );
 
+  const allowedOperations: (
+    selectionStart: BeeTableSelectionActiveCell | undefined,
+    selectionEnd: BeeTableSelectionActiveCell | undefined,
+    reactTableInstanceRowsLength: number,
+    column: ReactTable.ColumnInstance<any> | undefined,
+    columns: ReactTable.ColumnInstance<any>[] | undefined
+  ) => BeeTableOperation[] = useCallback(
+    (
+      selectionStart: BeeTableSelectionActiveCell | undefined,
+      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      reactTableInstanceRowsLength: number,
+      column: ReactTable.ColumnInstance<any> | undefined,
+      columns: ReactTable.ColumnInstance<any>[] | undefined
+    ) => {
+      if (!selectionStart || !selectionEnd) {
+        return [];
+      }
+
+      const columnIndex = selectionStart.columnIndex;
+
+      const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
+        ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
+        : true;
+
+      const columnCanBeDeleted =
+        columnIndex > 0 &&
+        atLeastTwoColumnsOfTheSameGroupType &&
+        (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
+        (column?.columns?.length ?? 0) <= 0;
+
+      const columnOperations =
+        columnIndex === 0 // This is the rowIndex column
+          ? []
+          : [
+              BeeTableOperation.ColumnInsertLeft,
+              BeeTableOperation.ColumnInsertRight,
+              ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
+            ];
+
+      return [
+        ...columnOperations,
+        ...(selectionStart.rowIndex >= 0
+          ? [
+              BeeTableOperation.RowInsertAbove,
+              BeeTableOperation.RowInsertBelow,
+              ...(reactTableInstanceRowsLength > 1 ? [BeeTableOperation.RowDelete] : []),
+              BeeTableOperation.RowReset,
+              BeeTableOperation.RowDuplicate,
+            ]
+          : []),
+      ];
+    },
+    []
+  );
+
   return (
     <NestedExpressionContainerContext.Provider value={nestedExpressionContainerValue}>
       <div className={`${listExpression.id} list-expression`}>
@@ -193,6 +250,7 @@ export function ListExpression(listExpression: ListExpressionDefinition & { isNe
           columns={beeTableColumns}
           rows={beeTableRows}
           operationConfig={beeTableOperationConfig}
+          allowedOperations={allowedOperations}
           getRowKey={getRowKey}
           onRowAdded={onRowAdded}
           onRowDeleted={onRowDeleted}

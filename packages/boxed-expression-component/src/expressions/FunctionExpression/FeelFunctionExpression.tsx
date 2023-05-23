@@ -48,6 +48,7 @@ import {
 import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import { useFunctionExpressionControllerCell, useFunctionExpressionParametersColumnHeader } from "./FunctionExpression";
 import { ExpressionContainer } from "../ExpressionDefinitionRoot/ExpressionContainer";
+import { BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
 
 export type FEEL_ROWTYPE = { functionExpression: FunctionExpressionDefinition };
 
@@ -155,6 +156,61 @@ export function FeelFunctionExpression({
       }, [functionExpression])
     );
 
+  const allowedOperations: (
+    selectionStart: BeeTableSelectionActiveCell | undefined,
+    selectionEnd: BeeTableSelectionActiveCell | undefined,
+    reactTableInstanceRowsLength: number,
+    column: ReactTable.ColumnInstance<any> | undefined,
+    columns: ReactTable.ColumnInstance<any>[] | undefined
+  ) => BeeTableOperation[] = useCallback(
+    (
+      selectionStart: BeeTableSelectionActiveCell | undefined,
+      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      reactTableInstanceRowsLength: number,
+      column: ReactTable.ColumnInstance<any> | undefined,
+      columns: ReactTable.ColumnInstance<any>[] | undefined
+    ) => {
+      if (!selectionStart || !selectionEnd) {
+        return [];
+      }
+
+      const columnIndex = selectionStart.columnIndex;
+
+      const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
+        ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
+        : true;
+
+      const columnCanBeDeleted =
+        columnIndex > 0 &&
+        atLeastTwoColumnsOfTheSameGroupType &&
+        (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
+        (column?.columns?.length ?? 0) <= 0;
+
+      const columnOperations =
+        columnIndex === 0 // This is the rowIndex column
+          ? []
+          : [
+              BeeTableOperation.ColumnInsertLeft,
+              BeeTableOperation.ColumnInsertRight,
+              ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
+            ];
+
+      return [
+        ...columnOperations,
+        ...(selectionStart.rowIndex >= 0
+          ? [
+              BeeTableOperation.RowInsertAbove,
+              BeeTableOperation.RowInsertBelow,
+              ...(reactTableInstanceRowsLength > 1 ? [BeeTableOperation.RowDelete] : []),
+              BeeTableOperation.RowReset,
+              BeeTableOperation.RowDuplicate,
+            ]
+          : []),
+      ];
+    },
+    []
+  );
+
   /// //////////////////////////////////////////////////////
 
   return (
@@ -164,6 +220,7 @@ export function FeelFunctionExpression({
           onColumnResizingWidthChange={onColumnResizingWidthChange}
           resizerStopBehavior={ResizerStopBehavior.SET_WIDTH_WHEN_SMALLER}
           operationConfig={beeTableOperationConfig}
+          allowedOperations={allowedOperations}
           onColumnUpdates={onColumnUpdates}
           getRowKey={getRowKey}
           onRowReset={onRowReset}

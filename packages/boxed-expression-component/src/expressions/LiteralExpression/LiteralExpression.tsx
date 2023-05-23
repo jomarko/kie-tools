@@ -17,12 +17,16 @@
 import * as React from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as ReactTable from "react-table";
-import { BeeTableHeaderVisibility, LiteralExpressionDefinition } from "../../api";
+import { BeeTableHeaderVisibility, BeeTableOperation, LiteralExpressionDefinition } from "../../api";
 import { useNestedExpressionContainer } from "../../resizing/NestedExpressionContainerContext";
 import { LITERAL_EXPRESSION_EXTRA_WIDTH, LITERAL_EXPRESSION_MIN_WIDTH } from "../../resizing/WidthConstants";
 import { BeeTable, BeeTableCellUpdate, BeeTableColumnUpdate, BeeTableRef } from "../../table/BeeTable";
 import { usePublishedBeeTableResizableColumns } from "../../resizing/BeeTableResizableColumnsContext";
-import { useBeeTableCoordinates, useBeeTableSelectableCellRef } from "../../selection/BeeTableSelectionContext";
+import {
+  BeeTableSelectionActiveCell,
+  useBeeTableCoordinates,
+  useBeeTableSelectableCellRef,
+} from "../../selection/BeeTableSelectionContext";
 import {
   useBoxedExpressionEditor,
   useBoxedExpressionEditorDispatch,
@@ -30,6 +34,7 @@ import {
 import "./LiteralExpression.css";
 import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import { ResizerStopBehavior } from "../../resizing/ResizingWidthsContext";
+import _ from "lodash";
 
 type ROWTYPE = any;
 
@@ -156,6 +161,61 @@ export function LiteralExpression(literalExpression: LiteralExpressionDefinition
     return [];
   }, []);
 
+  const allowedOperations: (
+    selectionStart: BeeTableSelectionActiveCell | undefined,
+    selectionEnd: BeeTableSelectionActiveCell | undefined,
+    reactTableInstanceRowsLength: number,
+    column: ReactTable.ColumnInstance<any> | undefined,
+    columns: ReactTable.ColumnInstance<any>[] | undefined
+  ) => BeeTableOperation[] = useCallback(
+    (
+      selectionStart: BeeTableSelectionActiveCell | undefined,
+      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      reactTableInstanceRowsLength: number,
+      column: ReactTable.ColumnInstance<any> | undefined,
+      columns: ReactTable.ColumnInstance<any>[] | undefined
+    ) => {
+      if (!selectionStart || !selectionEnd) {
+        return [];
+      }
+
+      const columnIndex = selectionStart.columnIndex;
+
+      const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
+        ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
+        : true;
+
+      const columnCanBeDeleted =
+        columnIndex > 0 &&
+        atLeastTwoColumnsOfTheSameGroupType &&
+        (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
+        (column?.columns?.length ?? 0) <= 0;
+
+      const columnOperations =
+        columnIndex === 0 // This is the rowIndex column
+          ? []
+          : [
+              BeeTableOperation.ColumnInsertLeft,
+              BeeTableOperation.ColumnInsertRight,
+              ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
+            ];
+
+      return [
+        ...columnOperations,
+        ...(selectionStart.rowIndex >= 0
+          ? [
+              BeeTableOperation.RowInsertAbove,
+              BeeTableOperation.RowInsertBelow,
+              ...(reactTableInstanceRowsLength > 1 ? [BeeTableOperation.RowDelete] : []),
+              BeeTableOperation.RowReset,
+              BeeTableOperation.RowDuplicate,
+            ]
+          : []),
+      ];
+    },
+    []
+  );
+
   return (
     <div className={`literal-expression`}>
       <div className={"literal-expression-body-container"}>
@@ -170,6 +230,7 @@ export function LiteralExpression(literalExpression: LiteralExpressionDefinition
           onColumnUpdates={onColumnUpdates}
           onCellUpdates={onCellUpdates}
           operationConfig={beeTableOperationConfig}
+          allowedOperations={allowedOperations}
           onColumnResizingWidthChange={onColumnResizingWidthChange}
           shouldRenderRowIndexColumn={false}
           shouldShowRowsInlineControls={false}

@@ -38,7 +38,11 @@ import {
   CONTEXT_ENTRY_INFO_MIN_WIDTH,
   CONTEXT_EXPRESSION_EXTRA_WIDTH,
 } from "../../resizing/WidthConstants";
-import { useBeeTableSelectableCellRef, useBeeTableCoordinates } from "../../selection/BeeTableSelectionContext";
+import {
+  useBeeTableSelectableCellRef,
+  useBeeTableCoordinates,
+  BeeTableSelectionActiveCell,
+} from "../../selection/BeeTableSelectionContext";
 import { BeeTable, BeeTableColumnUpdate } from "../../table/BeeTable";
 import {
   useBoxedExpressionEditor,
@@ -49,6 +53,7 @@ import { ContextEntryExpressionCell } from "./ContextEntryExpressionCell";
 import { ContextEntryInfoCell } from "./ContextEntryInfoCell";
 import "./ContextExpression.css";
 import { ContextResultExpressionCell } from "./ContextResultExpressionCell";
+import _ from "lodash";
 
 const CONTEXT_ENTRY_DEFAULT_DATA_TYPE = DmnBuiltInDataType.Undefined;
 
@@ -298,6 +303,61 @@ export function ContextExpression(contextExpression: ContextExpressionDefinition
     [getDefaultContextEntry, setExpression]
   );
 
+  const allowedOperations: (
+    selectionStart: BeeTableSelectionActiveCell | undefined,
+    selectionEnd: BeeTableSelectionActiveCell | undefined,
+    reactTableInstanceRowsLength: number,
+    column: ReactTable.ColumnInstance<any> | undefined,
+    columns: ReactTable.ColumnInstance<any>[] | undefined
+  ) => BeeTableOperation[] = useCallback(
+    (
+      selectionStart: BeeTableSelectionActiveCell | undefined,
+      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      reactTableInstanceRowsLength: number,
+      column: ReactTable.ColumnInstance<any> | undefined,
+      columns: ReactTable.ColumnInstance<any>[] | undefined
+    ) => {
+      if (!selectionStart || !selectionEnd) {
+        return [];
+      }
+
+      const columnIndex = selectionStart.columnIndex;
+
+      const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
+        ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
+        : true;
+
+      const columnCanBeDeleted =
+        columnIndex > 0 &&
+        atLeastTwoColumnsOfTheSameGroupType &&
+        (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
+        (column?.columns?.length ?? 0) <= 0;
+
+      const columnOperations =
+        columnIndex === 0 // This is the rowIndex column
+          ? []
+          : [
+              BeeTableOperation.ColumnInsertLeft,
+              BeeTableOperation.ColumnInsertRight,
+              ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
+            ];
+
+      return [
+        ...columnOperations,
+        ...(selectionStart.rowIndex >= 0
+          ? [
+              BeeTableOperation.RowInsertAbove,
+              BeeTableOperation.RowInsertBelow,
+              ...(reactTableInstanceRowsLength > 1 ? [BeeTableOperation.RowDelete] : []),
+              BeeTableOperation.RowReset,
+              BeeTableOperation.RowDuplicate,
+            ]
+          : []),
+      ];
+    },
+    []
+  );
+
   return (
     <NestedExpressionContainerContext.Provider value={nestedExpressionContainerValue}>
       <div className={`context-expression ${contextExpression.id}`}>
@@ -311,6 +371,7 @@ export function ContextExpression(contextExpression: ContextExpressionDefinition
           rows={contextExpression.contextEntries}
           onColumnUpdates={onColumnUpdates}
           operationConfig={beeTableOperationConfig}
+          allowedOperations={allowedOperations}
           getRowKey={getRowKey}
           additionalRow={beeTableAdditionalRow}
           onRowAdded={onRowAdded}
