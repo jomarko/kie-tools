@@ -126,6 +126,14 @@ export function BeeTableContextMenuHandler({
           return i18n.rowOperations.reset;
         case BeeTableOperation.RowDuplicate:
           return i18n.rowOperations.duplicate;
+        case BeeTableOperation.SelectionCopy:
+          return i18n.terms.copy;
+        case BeeTableOperation.SelectionCut:
+          return i18n.terms.cut;
+        case BeeTableOperation.SelectionPaste:
+          return i18n.terms.paste;
+        case BeeTableOperation.SelectionReset:
+          return i18n.terms.reset;
         default:
           assertUnreachable(operation);
       }
@@ -151,6 +159,14 @@ export function BeeTableContextMenuHandler({
         return <CompressIcon />;
       case BeeTableOperation.RowDuplicate:
         return <BlueprintIcon />;
+      case BeeTableOperation.SelectionCopy:
+        return <CopyIcon />;
+      case BeeTableOperation.SelectionCut:
+        return <CutIcon />;
+      case BeeTableOperation.SelectionPaste:
+        return <PasteIcon />;
+      case BeeTableOperation.SelectionReset:
+        return <CompressIcon />;
       default:
         assertUnreachable(operation);
     }
@@ -210,6 +226,22 @@ export function BeeTableContextMenuHandler({
           onRowDuplicated?.({ rowIndex: rowIndex });
           console.info(`Duplicate row ${rowIndex}`);
           break;
+        case BeeTableOperation.SelectionCopy:
+          copy();
+          console.info("Copying");
+          break;
+        case BeeTableOperation.SelectionCut:
+          cut();
+          console.info("Cuting");
+          break;
+        case BeeTableOperation.SelectionPaste:
+          paste();
+          console.info("Pasting");
+          break;
+        case BeeTableOperation.SelectionReset:
+          erase();
+          console.info("Reseting");
+          break;
         default:
           assertUnreachable(operation);
       }
@@ -226,6 +258,10 @@ export function BeeTableContextMenuHandler({
       onRowDeleted,
       onRowReset,
       onRowDuplicated,
+      copy,
+      cut,
+      paste,
+      erase,
     ]
   );
 
@@ -251,7 +287,7 @@ export function BeeTableContextMenuHandler({
             className="table-context-menu"
             onSelect={(e, itemId) => handleOperation(itemId as BeeTableOperation)}
           >
-            {operationGroups.map(({ group, items }) => (
+            {operationGroups.map(({ group, items }, operationGroupIndex) => (
               <React.Fragment key={group}>
                 <MenuGroup
                   label={group}
@@ -300,30 +336,12 @@ export function BeeTableContextMenuHandler({
                     column,
                     columns
                   ).includes(operation.type)
-                ) && <Divider key={"divider-" + group} style={{ padding: "16px" }} />}
+                ) &&
+                  operationGroupIndex + 1 < operationGroups.length && (
+                    <Divider key={"divider-" + group} style={{ padding: "16px" }} />
+                  )}
               </React.Fragment>
             ))}
-
-            <MenuGroup label={"SELECTION"}>
-              <MenuList>
-                {/* FIXME: Depends on some cells registering setValue (https://github.com/kiegroup/kie-issues/issues/168) */}
-                <MenuItem onClick={erase} icon={<CompressIcon />}>
-                  {i18n.terms.reset}
-                </MenuItem>
-                {/* FIXME: Depends on some cells registering getValue (https://github.com/kiegroup/kie-issues/issues/168) */}
-                <MenuItem onClick={copy} icon={<CopyIcon />}>
-                  {i18n.terms.copy}
-                </MenuItem>
-                {/* FIXME: Depends on some cells registering getValue AND setValue (https://github.com/kiegroup/kie-issues/issues/168) */}
-                <MenuItem onClick={cut} icon={<CutIcon />}>
-                  {i18n.terms.cut}
-                </MenuItem>
-                {/* FIXME: Depends on some cells registering setValue (https://github.com/kiegroup/kie-issues/issues/168)*/}
-                <MenuItem onClick={paste} icon={<PasteIcon />}>
-                  {i18n.terms.paste}
-                </MenuItem>
-              </MenuList>
-            </MenuGroup>
           </Menu>
         </div>
       )}

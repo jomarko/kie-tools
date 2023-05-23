@@ -105,6 +105,10 @@ export enum BeeTableOperation {
   RowDelete,
   RowReset,
   RowDuplicate,
+  SelectionCopy,
+  SelectionCut,
+  SelectionPaste,
+  SelectionReset,
 }
 
 export interface BeeTableOperationGroup {

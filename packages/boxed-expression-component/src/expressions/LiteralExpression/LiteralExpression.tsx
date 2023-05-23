@@ -35,6 +35,7 @@ import "./LiteralExpression.css";
 import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import { ResizerStopBehavior } from "../../resizing/ResizingWidthsContext";
 import _ from "lodash";
+import { useBoxedExpressionEditorI18n } from "../../i18n";
 
 type ROWTYPE = any;
 
@@ -157,8 +158,20 @@ export function LiteralExpression(literalExpression: LiteralExpressionDefinition
     return row.id;
   }, []);
 
+  const { i18n } = useBoxedExpressionEditorI18n();
+
   const beeTableOperationConfig = useMemo(() => {
-    return [];
+    return [
+      {
+        group: _.upperCase(i18n.terms.selection),
+        items: [
+          { name: i18n.terms.copy, type: BeeTableOperation.SelectionCopy },
+          { name: i18n.terms.cut, type: BeeTableOperation.SelectionCut },
+          { name: i18n.terms.paste, type: BeeTableOperation.SelectionPaste },
+          { name: i18n.terms.reset, type: BeeTableOperation.SelectionReset },
+        ],
+      },
+    ];
   }, []);
 
   const allowedOperations: (
@@ -202,6 +215,12 @@ export function LiteralExpression(literalExpression: LiteralExpressionDefinition
 
       return [
         ...columnOperations,
+        ...[
+          BeeTableOperation.SelectionCopy,
+          BeeTableOperation.SelectionCut,
+          BeeTableOperation.SelectionPaste,
+          BeeTableOperation.SelectionReset,
+        ],
         ...(selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.RowInsertAbove,
