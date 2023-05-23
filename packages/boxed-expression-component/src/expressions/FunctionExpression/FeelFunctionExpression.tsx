@@ -105,15 +105,6 @@ export function FeelFunctionExpression({
         group: _.upperCase(i18n.function),
         items: [{ name: i18n.rowOperations.reset, type: BeeTableOperation.RowReset }],
       },
-      {
-        group: _.upperCase(i18n.terms.selection),
-        items: [
-          { name: i18n.terms.copy, type: BeeTableOperation.SelectionCopy },
-          { name: i18n.terms.cut, type: BeeTableOperation.SelectionCut },
-          { name: i18n.terms.paste, type: BeeTableOperation.SelectionPaste },
-          { name: i18n.terms.reset, type: BeeTableOperation.SelectionReset },
-        ],
-      },
     ];
   }, [i18n]);
 
@@ -183,45 +174,7 @@ export function FeelFunctionExpression({
         return [];
       }
 
-      const columnIndex = selectionStart.columnIndex;
-
-      const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
-        ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
-        : true;
-
-      const columnCanBeDeleted =
-        columnIndex > 0 &&
-        atLeastTwoColumnsOfTheSameGroupType &&
-        (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
-        (column?.columns?.length ?? 0) <= 0;
-
-      const columnOperations =
-        columnIndex === 0 // This is the rowIndex column
-          ? []
-          : [
-              BeeTableOperation.ColumnInsertLeft,
-              BeeTableOperation.ColumnInsertRight,
-              ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
-            ];
-
-      return [
-        ...columnOperations,
-        ...[
-          BeeTableOperation.SelectionCopy,
-          BeeTableOperation.SelectionCut,
-          BeeTableOperation.SelectionPaste,
-          BeeTableOperation.SelectionReset,
-        ],
-        ...(selectionStart.rowIndex >= 0
-          ? [
-              BeeTableOperation.RowInsertAbove,
-              BeeTableOperation.RowInsertBelow,
-              ...(reactTableInstanceRowsLength > 1 ? [BeeTableOperation.RowDelete] : []),
-              BeeTableOperation.RowReset,
-              BeeTableOperation.RowDuplicate,
-            ]
-          : []),
-      ];
+      return [...(selectionStart.rowIndex >= 0 ? [BeeTableOperation.RowReset] : [])];
     },
     []
   );
