@@ -717,12 +717,14 @@ export function DecisionTableExpression(
 
       return [
         ...columnOperations,
-        ...[
-          BeeTableOperation.SelectionCopy,
-          BeeTableOperation.SelectionCut,
-          BeeTableOperation.SelectionPaste,
-          BeeTableOperation.SelectionReset,
-        ],
+        ...(selectionStart.rowIndex >= 0 && columnIndex > 0
+          ? [
+              BeeTableOperation.SelectionCopy,
+              BeeTableOperation.SelectionCut,
+              BeeTableOperation.SelectionPaste,
+              BeeTableOperation.SelectionReset,
+            ]
+          : []),
         ...(selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.RowInsertAbove,
