@@ -192,42 +192,17 @@ export function LiteralExpression(literalExpression: LiteralExpressionDefinition
         return [];
       }
 
-      const columnIndex = selectionStart.columnIndex;
-
-      const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
-        ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
-        : true;
-
-      const columnCanBeDeleted =
-        columnIndex > 0 &&
-        atLeastTwoColumnsOfTheSameGroupType &&
-        (columns?.length ?? 0) > 2 && // That's a regular column and the rowIndex column
-        (column?.columns?.length ?? 0) <= 0;
-
-      const columnOperations =
-        columnIndex === 0 // This is the rowIndex column
-          ? []
-          : [
-              BeeTableOperation.ColumnInsertLeft,
-              BeeTableOperation.ColumnInsertRight,
-              ...(columnCanBeDeleted ? [BeeTableOperation.ColumnDelete] : []),
-            ];
+      if (selectionStart !== selectionEnd) {
+        throw new RangeError("Context menus do not support ranges for now");
+      }
 
       return [
-        ...columnOperations,
-        ...[
-          BeeTableOperation.SelectionCopy,
-          BeeTableOperation.SelectionCut,
-          BeeTableOperation.SelectionPaste,
-          BeeTableOperation.SelectionReset,
-        ],
-        ...(selectionStart.rowIndex >= 0
+        ...(selectionStart.rowIndex === 0
           ? [
-              BeeTableOperation.RowInsertAbove,
-              BeeTableOperation.RowInsertBelow,
-              ...(reactTableInstanceRowsLength > 1 ? [BeeTableOperation.RowDelete] : []),
-              BeeTableOperation.RowReset,
-              BeeTableOperation.RowDuplicate,
+              BeeTableOperation.SelectionCopy,
+              BeeTableOperation.SelectionCut,
+              BeeTableOperation.SelectionPaste,
+              BeeTableOperation.SelectionReset,
             ]
           : []),
       ];

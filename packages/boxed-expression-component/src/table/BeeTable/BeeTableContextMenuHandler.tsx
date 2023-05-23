@@ -38,6 +38,9 @@ import CopyIcon from "@patternfly/react-icons/dist/js/icons/copy-icon";
 import PasteIcon from "@patternfly/react-icons/dist/js/icons/paste-icon";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { useBoxedExpressionEditorI18n } from "../../i18n";
+import { EmptyState, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
+import CubesIcon from "@patternfly/react-icons/dist/js/icons/cubes-icon";
+import { Title } from "@patternfly/react-core/dist/js/components/Title";
 
 export interface BeeTableContextMenuHandlerProps {
   tableRef: React.RefObject<HTMLDivElement | null>;
@@ -336,10 +339,16 @@ export function BeeTableContextMenuHandler({
                     column,
                     columns
                   ).includes(operation.type)
-                ) &&
+                ) ? (
                   operationGroupIndex + 1 < operationGroups.length && (
                     <Divider key={"divider-" + group} style={{ padding: "16px" }} />
-                  )}
+                  )
+                ) : (
+                  <EmptyState>
+                    <EmptyStateIcon icon={CubesIcon} />
+                    <Title headingLevel="h4">{i18n.noOptionsAvailable}</Title>
+                  </EmptyState>
+                )}
               </React.Fragment>
             ))}
           </Menu>
