@@ -21,7 +21,7 @@ import BlueprintIcon from "@patternfly/react-icons/dist/js/icons/blueprint-icon"
 import CompressIcon from "@patternfly/react-icons/dist/js/icons/compress-icon";
 import * as React from "react";
 import { useCallback, useMemo } from "react";
-import { BeeTableOperation, BeeTableOperationConfig, BeeTableOperationGroup } from "../../api";
+import { BeeTableOperation, BeeTableOperationConfig } from "../../api";
 import { useCustomContextMenuHandler } from "../../contextMenu/Hooks";
 import { useBoxedExpressionEditor } from "../../expressions/BoxedExpressionEditor/BoxedExpressionEditorContext";
 import { assertUnreachable } from "../../expressions/ExpressionDefinitionRoot/ExpressionDefinitionLogicTypeSelector";
@@ -38,9 +38,6 @@ import CopyIcon from "@patternfly/react-icons/dist/js/icons/copy-icon";
 import PasteIcon from "@patternfly/react-icons/dist/js/icons/paste-icon";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { useBoxedExpressionEditorI18n } from "../../i18n";
-import { EmptyState, EmptyStateIcon } from "@patternfly/react-core/dist/js/components/EmptyState";
-import CubesIcon from "@patternfly/react-icons/dist/js/icons/cubes-icon";
-import { Title } from "@patternfly/react-core/dist/js/components/Title";
 
 export interface BeeTableContextMenuHandlerProps {
   tableRef: React.RefObject<HTMLDivElement | null>;
@@ -292,6 +289,16 @@ export function BeeTableContextMenuHandler({
           >
             {operationGroups.map(({ group, items }, operationGroupIndex) => (
               <React.Fragment key={group}>
+                {items.some((operation) =>
+                  allowedOperations(
+                    selectionStart,
+                    selectionStart,
+                    reactTableInstanceRowsLength,
+                    column,
+                    columns
+                  ).includes(operation.type)
+                ) &&
+                  operationGroupIndex > 0 && <Divider key={"divider-" + group} style={{ padding: "16px" }} />}
                 <MenuGroup
                   label={group}
                   className={
@@ -331,24 +338,6 @@ export function BeeTableContextMenuHandler({
                     ))}
                   </MenuList>
                 </MenuGroup>
-                {items.some((operation) =>
-                  allowedOperations(
-                    selectionStart,
-                    selectionStart,
-                    reactTableInstanceRowsLength,
-                    column,
-                    columns
-                  ).includes(operation.type)
-                ) ? (
-                  operationGroupIndex + 1 < operationGroups.length && (
-                    <Divider key={"divider-" + group} style={{ padding: "16px" }} />
-                  )
-                ) : (
-                  <EmptyState>
-                    <EmptyStateIcon icon={CubesIcon} />
-                    <Title headingLevel="h4">{i18n.noOptionsAvailable}</Title>
-                  </EmptyState>
-                )}
               </React.Fragment>
             ))}
           </Menu>

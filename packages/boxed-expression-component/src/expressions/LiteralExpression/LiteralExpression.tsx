@@ -192,10 +192,6 @@ export function LiteralExpression(literalExpression: LiteralExpressionDefinition
         return [];
       }
 
-      if (selectionStart !== selectionEnd) {
-        throw new RangeError("Context menus do not support ranges for now");
-      }
-
       return [
         ...(selectionStart.rowIndex === 0
           ? [
