@@ -108,7 +108,7 @@ export function DecisionTableExpression(
 
   const beeTableOperationConfig = useMemo<BeeTableOperationConfig>(() => {
     const config: BeeTableOperationConfig = {};
-    config[""] = generateOperationConfig(i18n.inputClause);
+    config[""] = generateOperationConfig(i18n.outputClause);
     config[DecisionTableColumnType.InputClause] = generateOperationConfig(i18n.inputClause);
     config[DecisionTableColumnType.OutputClause] = generateOperationConfig(i18n.outputClause);
     config[DecisionTableColumnType.Annotation] = generateOperationConfig(i18n.ruleAnnotation);
