@@ -39,6 +39,8 @@ import CopyIcon from "@patternfly/react-icons/dist/js/icons/copy-icon";
 import PasteIcon from "@patternfly/react-icons/dist/js/icons/paste-icon";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { useBoxedExpressionEditorI18n } from "../../i18n";
+import { EmptyState } from "@patternfly/react-core";
+import { Title } from "@patternfly/react-core/dist/js/components/Title";
 
 export interface BeeTableContextMenuHandlerProps {
   tableRef: React.RefObject<HTMLDivElement | null>;
@@ -111,6 +113,10 @@ export function BeeTableContextMenuHandler({
     }
     return (operationConfig ?? {})[column?.groupType || ""];
   }, [activeCell, column?.groupType, operationConfig]);
+
+  const allOperations = useMemo(() => {
+    return operationGroups.flatMap(({ group, items }) => items);
+  }, [operationGroups]);
 
   const operationLabel = useCallback(
     (operation: BeeTableOperation) => {
@@ -283,6 +289,9 @@ export function BeeTableContextMenuHandler({
     return reactTableInstance.rows.length;
   }, [reactTableInstance.rows.length]);
 
+  const currentAllowedOperations = allowedOperations(selection, reactTableInstanceRowsLength, column, columns);
+  const someOperationIsAllowed = allOperations.some((operation) => currentAllowedOperations.includes(operation.type));
+
   return (
     <>
       {isOpen && (
@@ -292,45 +301,40 @@ export function BeeTableContextMenuHandler({
             className="table-context-menu"
             onSelect={(e, itemId) => handleOperation(itemId as BeeTableOperation)}
           >
-            {operationGroups.map(({ group, items }, operationGroupIndex) => (
-              <React.Fragment key={group}>
-                {items.some((operation) =>
-                  allowedOperations(selection, reactTableInstanceRowsLength, column, columns).includes(operation.type)
-                ) &&
-                  operationGroupIndex > 0 && <Divider key={"divider-" + group} style={{ padding: "16px" }} />}
-                <MenuGroup
-                  label={group}
-                  className={
-                    items.every(
-                      (operation) =>
-                        !allowedOperations(selection, reactTableInstanceRowsLength, column, columns).includes(
-                          operation.type
-                        )
-                    )
-                      ? "no-allowed-actions-in-group"
-                      : ""
-                  }
-                >
-                  <MenuList>
-                    {items.map((operation) => (
-                      <MenuItem
-                        icon={operationIcon(operation.type)}
-                        data-ouia-component-id={"expression-table-context-menu-" + operation.name}
-                        key={operation.type + group}
-                        itemId={operation.type}
-                        isDisabled={
-                          !allowedOperations(selection, reactTableInstanceRowsLength, column, columns).includes(
-                            operation.type
-                          )
-                        }
-                      >
-                        {operationLabel(operation.type)}
-                      </MenuItem>
-                    ))}
-                  </MenuList>
-                </MenuGroup>
-              </React.Fragment>
-            ))}
+            {someOperationIsAllowed &&
+              operationGroups.map(({ group, items }, operationGroupIndex) => (
+                <React.Fragment key={group}>
+                  {items.some((operation) => currentAllowedOperations.includes(operation.type)) &&
+                    operationGroupIndex > 0 && <Divider key={"divider-" + group} style={{ padding: "16px" }} />}
+                  <MenuGroup
+                    label={group}
+                    className={
+                      items.every((operation) => !currentAllowedOperations.includes(operation.type))
+                        ? "no-allowed-actions-in-group"
+                        : ""
+                    }
+                  >
+                    <MenuList>
+                      {items.map((operation) => (
+                        <MenuItem
+                          icon={operationIcon(operation.type)}
+                          data-ouia-component-id={"expression-table-context-menu-" + operation.name}
+                          key={operation.type + group}
+                          itemId={operation.type}
+                          isDisabled={!currentAllowedOperations.includes(operation.type)}
+                        >
+                          {operationLabel(operation.type)}
+                        </MenuItem>
+                      ))}
+                    </MenuList>
+                  </MenuGroup>
+                </React.Fragment>
+              ))}
+            {!someOperationIsAllowed && (
+              <EmptyState>
+                <Title headingLevel="h6">{i18n.noOperationsAvailable}</Title>
+              </EmptyState>
+            )}
           </Menu>
         </div>
       )}
