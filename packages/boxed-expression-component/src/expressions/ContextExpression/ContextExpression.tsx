@@ -42,6 +42,7 @@ import {
   useBeeTableSelectableCellRef,
   useBeeTableCoordinates,
   BeeTableSelectionActiveCell,
+  BeeTableSelection,
 } from "../../selection/BeeTableSelectionContext";
 import { BeeTable, BeeTableColumnUpdate } from "../../table/BeeTable";
 import {
@@ -201,7 +202,7 @@ export function ContextExpression(contextExpression: ContextExpressionDefinition
           { name: i18n.rowOperations.insertAbove, type: BeeTableOperation.RowInsertAbove },
           { name: i18n.rowOperations.insertBelow, type: BeeTableOperation.RowInsertBelow },
           { name: i18n.rowOperations.delete, type: BeeTableOperation.RowDelete },
-          { name: i18n.rowOperations.delete, type: BeeTableOperation.RowDuplicate },
+          { name: i18n.rowOperations.duplicate, type: BeeTableOperation.RowDuplicate },
         ],
       },
       {
@@ -313,26 +314,19 @@ export function ContextExpression(contextExpression: ContextExpressionDefinition
     [getDefaultContextEntry, setExpression]
   );
 
-  const allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
-    reactTableInstanceRowsLength: number,
-    column: ReactTable.ColumnInstance<any> | undefined,
-    columns: ReactTable.ColumnInstance<any>[] | undefined
-  ) => BeeTableOperation[] = useCallback(
+  const allowedOperations = useCallback(
     (
-      selectionStart: BeeTableSelectionActiveCell | undefined,
-      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      selection: BeeTableSelection,
       reactTableInstanceRowsLength: number,
       column: ReactTable.ColumnInstance<any> | undefined,
       columns: ReactTable.ColumnInstance<any>[] | undefined
     ) => {
-      if (!selectionStart || !selectionEnd) {
+      if (!selection.selectionStart || !selection.selectionEnd) {
         return [];
       }
 
-      const columnIndex = selectionStart.columnIndex;
-      const rowIndex = selectionStart.rowIndex;
+      const columnIndex = selection.selectionStart.columnIndex;
+      const rowIndex = selection.selectionStart.rowIndex;
 
       return [
         ...(columnIndex > 1
@@ -343,7 +337,7 @@ export function ContextExpression(contextExpression: ContextExpressionDefinition
               BeeTableOperation.SelectionReset,
             ]
           : []),
-        ...(selectionStart.rowIndex >= 0
+        ...(selection.selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.RowInsertAbove,
               ...(rowIndex !== reactTableInstanceRowsLength ? [BeeTableOperation.RowInsertBelow] : []), // do not insert below <result>

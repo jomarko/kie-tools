@@ -48,7 +48,7 @@ import {
 import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import { useFunctionExpressionControllerCell, useFunctionExpressionParametersColumnHeader } from "./FunctionExpression";
 import { ExpressionContainer } from "../ExpressionDefinitionRoot/ExpressionContainer";
-import { BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
+import { BeeTableSelection, BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
 
 export type FEEL_ROWTYPE = { functionExpression: FunctionExpressionDefinition };
 
@@ -156,25 +156,18 @@ export function FeelFunctionExpression({
       }, [functionExpression])
     );
 
-  const allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
-    reactTableInstanceRowsLength: number,
-    column: ReactTable.ColumnInstance<any> | undefined,
-    columns: ReactTable.ColumnInstance<any>[] | undefined
-  ) => BeeTableOperation[] = useCallback(
+  const allowedOperations = useCallback(
     (
-      selectionStart: BeeTableSelectionActiveCell | undefined,
-      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      selection: BeeTableSelection,
       reactTableInstanceRowsLength: number,
       column: ReactTable.ColumnInstance<any> | undefined,
       columns: ReactTable.ColumnInstance<any>[] | undefined
     ) => {
-      if (!selectionStart || !selectionEnd) {
+      if (!selection.selectionStart || !selection.selectionEnd) {
         return [];
       }
 
-      return [...(selectionStart.rowIndex >= 0 ? [BeeTableOperation.RowReset] : [])];
+      return [...(selection.selectionStart.rowIndex >= 0 ? [BeeTableOperation.RowReset] : [])];
     },
     []
   );

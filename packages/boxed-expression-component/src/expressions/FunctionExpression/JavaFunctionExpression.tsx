@@ -41,7 +41,11 @@ import {
   JAVA_FUNCTION_EXPRESSION_LABEL_MIN_WIDTH,
   JAVA_FUNCTION_EXPRESSION_VALUES_MIN_WIDTH,
 } from "../../resizing/WidthConstants";
-import { BeeTableSelectionActiveCell, useBeeTableSelectableCellRef } from "../../selection/BeeTableSelectionContext";
+import {
+  BeeTableSelection,
+  BeeTableSelectionActiveCell,
+  useBeeTableSelectableCellRef,
+} from "../../selection/BeeTableSelectionContext";
 import { BeeTable, BeeTableCellUpdate, BeeTableColumnUpdate, BeeTableRef } from "../../table/BeeTable";
 import {
   useBoxedExpressionEditor,
@@ -259,16 +263,9 @@ export function JavaFunctionExpression({
     [setExpression]
   );
 
-  const allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
-    reactTableInstanceRowsLength: number,
-    column: ReactTable.ColumnInstance<any> | undefined,
-    columns: ReactTable.ColumnInstance<any>[] | undefined
-  ) => BeeTableOperation[] = useCallback(
+  const allowedOperations = useCallback(
     (
-      selectionStart: BeeTableSelectionActiveCell | undefined,
-      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      selection: BeeTableSelection,
       reactTableInstanceRowsLength: number,
       column: ReactTable.ColumnInstance<any> | undefined,
       columns: ReactTable.ColumnInstance<any>[] | undefined

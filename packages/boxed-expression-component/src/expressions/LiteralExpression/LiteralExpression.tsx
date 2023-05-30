@@ -23,7 +23,7 @@ import { LITERAL_EXPRESSION_EXTRA_WIDTH, LITERAL_EXPRESSION_MIN_WIDTH } from "..
 import { BeeTable, BeeTableCellUpdate, BeeTableColumnUpdate, BeeTableRef } from "../../table/BeeTable";
 import { usePublishedBeeTableResizableColumns } from "../../resizing/BeeTableResizableColumnsContext";
 import {
-  BeeTableSelectionActiveCell,
+  BeeTableSelection,
   useBeeTableCoordinates,
   useBeeTableSelectableCellRef,
 } from "../../selection/BeeTableSelectionContext";
@@ -174,26 +174,19 @@ export function LiteralExpression(literalExpression: LiteralExpressionDefinition
     ];
   }, []);
 
-  const allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
-    reactTableInstanceRowsLength: number,
-    column: ReactTable.ColumnInstance<any> | undefined,
-    columns: ReactTable.ColumnInstance<any>[] | undefined
-  ) => BeeTableOperation[] = useCallback(
+  const allowedOperations = useCallback(
     (
-      selectionStart: BeeTableSelectionActiveCell | undefined,
-      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      selection: BeeTableSelection,
       reactTableInstanceRowsLength: number,
       column: ReactTable.ColumnInstance<any> | undefined,
       columns: ReactTable.ColumnInstance<any>[] | undefined
     ) => {
-      if (!selectionStart || !selectionEnd) {
+      if (!selection.selectionStart || !selection.selectionEnd) {
         return [];
       }
 
       return [
-        ...(selectionStart.rowIndex === 0
+        ...(selection.selectionStart.rowIndex === 0
           ? [
               BeeTableOperation.SelectionCopy,
               BeeTableOperation.SelectionCut,

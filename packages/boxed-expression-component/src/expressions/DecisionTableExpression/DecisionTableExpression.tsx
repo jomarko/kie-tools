@@ -53,7 +53,7 @@ import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import { assertUnreachable } from "../ExpressionDefinitionRoot/ExpressionDefinitionLogicTypeSelector";
 import { HitPolicySelector, HIT_POLICIES_THAT_SUPPORT_AGGREGATION } from "./HitPolicySelector";
 import "./DecisionTableExpression.css";
-import { BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
+import { BeeTableSelection, BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
 import _ from "lodash";
 
 type ROWTYPE = any; // FIXME: https://github.com/kiegroup/kie-issues/issues/169
@@ -676,25 +676,18 @@ export function DecisionTableExpression(
     return decisionTableExpression.isNested ? BeeTableHeaderVisibility.LastLevel : BeeTableHeaderVisibility.AllLevels;
   }, [decisionTableExpression.isNested]);
 
-  const allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
-    reactTableInstanceRowsLength: number,
-    column: ReactTable.ColumnInstance<any> | undefined,
-    columns: ReactTable.ColumnInstance<any>[] | undefined
-  ) => BeeTableOperation[] = useCallback(
+  const allowedOperations = useCallback(
     (
-      selectionStart: BeeTableSelectionActiveCell | undefined,
-      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      selection: BeeTableSelection,
       reactTableInstanceRowsLength: number,
       column: ReactTable.ColumnInstance<any> | undefined,
       columns: ReactTable.ColumnInstance<any>[] | undefined
     ) => {
-      if (!selectionStart || !selectionEnd) {
+      if (!selection.selectionStart || !selection.selectionEnd) {
         return [];
       }
 
-      const columnIndex = selectionStart.columnIndex;
+      const columnIndex = selection.selectionStart.columnIndex;
 
       const atLeastTwoColumnsOfTheSameGroupType = column?.groupType
         ? _.groupBy(columns, (column) => column?.groupType)[column.groupType].length > 1
@@ -717,7 +710,7 @@ export function DecisionTableExpression(
 
       return [
         ...columnOperations,
-        ...(selectionStart.rowIndex >= 0 && columnIndex > 0
+        ...(selection.selectionStart.rowIndex >= 0 && columnIndex > 0
           ? [
               BeeTableOperation.SelectionCopy,
               BeeTableOperation.SelectionCut,
@@ -725,7 +718,7 @@ export function DecisionTableExpression(
               BeeTableOperation.SelectionReset,
             ]
           : []),
-        ...(selectionStart.rowIndex >= 0
+        ...(selection.selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.RowInsertAbove,
               BeeTableOperation.RowInsertBelow,

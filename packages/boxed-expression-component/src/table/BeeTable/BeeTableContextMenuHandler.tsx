@@ -27,6 +27,7 @@ import { useBoxedExpressionEditor } from "../../expressions/BoxedExpressionEdito
 import { assertUnreachable } from "../../expressions/ExpressionDefinitionRoot/ExpressionDefinitionLogicTypeSelector";
 import "./BeeTableContextMenuHandler.css";
 import {
+  BeeTableSelection,
   BeeTableSelectionActiveCell,
   useBeeTableSelection,
   useBeeTableSelectionDispatch,
@@ -43,8 +44,7 @@ export interface BeeTableContextMenuHandlerProps {
   tableRef: React.RefObject<HTMLDivElement | null>;
   operationConfig: BeeTableOperationConfig | undefined;
   allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
+    selection: BeeTableSelection,
     reactTableInstanceRowsLength: number,
     column: ReactTable.ColumnInstance<any> | undefined,
     columns: ReactTable.ColumnInstance<any>[] | undefined
@@ -75,6 +75,11 @@ export function BeeTableContextMenuHandler({
   const { setCurrentlyOpenContextMenu } = useBoxedExpressionEditor();
 
   const { activeCell, selectionStart, selectionEnd } = useBeeTableSelection();
+  const selection: BeeTableSelection = {
+    active: activeCell,
+    selectionStart: selectionStart,
+    selectionEnd: selectionEnd,
+  };
   const { copy, cut, paste, erase } = useBeeTableSelectionDispatch();
 
   const columns = useMemo(() => {
@@ -290,13 +295,7 @@ export function BeeTableContextMenuHandler({
             {operationGroups.map(({ group, items }, operationGroupIndex) => (
               <React.Fragment key={group}>
                 {items.some((operation) =>
-                  allowedOperations(
-                    selectionStart,
-                    selectionStart,
-                    reactTableInstanceRowsLength,
-                    column,
-                    columns
-                  ).includes(operation.type)
+                  allowedOperations(selection, reactTableInstanceRowsLength, column, columns).includes(operation.type)
                 ) &&
                   operationGroupIndex > 0 && <Divider key={"divider-" + group} style={{ padding: "16px" }} />}
                 <MenuGroup
@@ -304,13 +303,9 @@ export function BeeTableContextMenuHandler({
                   className={
                     items.every(
                       (operation) =>
-                        !allowedOperations(
-                          selectionStart,
-                          selectionEnd,
-                          reactTableInstanceRowsLength,
-                          column,
-                          columns
-                        ).includes(operation.type)
+                        !allowedOperations(selection, reactTableInstanceRowsLength, column, columns).includes(
+                          operation.type
+                        )
                     )
                       ? "no-allowed-actions-in-group"
                       : ""
@@ -324,13 +319,9 @@ export function BeeTableContextMenuHandler({
                         key={operation.type + group}
                         itemId={operation.type}
                         isDisabled={
-                          !allowedOperations(
-                            selectionStart,
-                            selectionEnd,
-                            reactTableInstanceRowsLength,
-                            column,
-                            columns
-                          ).includes(operation.type)
+                          !allowedOperations(selection, reactTableInstanceRowsLength, column, columns).includes(
+                            operation.type
+                          )
                         }
                       >
                         {operationLabel(operation.type)}

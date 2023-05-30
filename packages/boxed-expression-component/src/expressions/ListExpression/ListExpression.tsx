@@ -42,7 +42,7 @@ import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import "./ListExpression.css";
 import { ListItemCell } from "./ListItemCell";
 import { ResizerStopBehavior } from "../../resizing/ResizingWidthsContext";
-import { BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
+import { BeeTableSelection, BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
 import _ from "lodash";
 
 export type ROWTYPE = ContextExpressionDefinitionEntry;
@@ -184,26 +184,19 @@ export function ListExpression(listExpression: ListExpressionDefinition & { isNe
     [setExpression]
   );
 
-  const allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
-    reactTableInstanceRowsLength: number,
-    column: ReactTable.ColumnInstance<any> | undefined,
-    columns: ReactTable.ColumnInstance<any>[] | undefined
-  ) => BeeTableOperation[] = useCallback(
+  const allowedOperations = useCallback(
     (
-      selectionStart: BeeTableSelectionActiveCell | undefined,
-      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      selection: BeeTableSelection,
       reactTableInstanceRowsLength: number,
       column: ReactTable.ColumnInstance<any> | undefined,
       columns: ReactTable.ColumnInstance<any>[] | undefined
     ) => {
-      if (!selectionStart || !selectionEnd) {
+      if (!selection.selectionStart || !selection.selectionEnd) {
         return [];
       }
 
       return [
-        ...(selectionStart.rowIndex >= 0
+        ...(selection.selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.RowInsertAbove,
               BeeTableOperation.RowInsertBelow,

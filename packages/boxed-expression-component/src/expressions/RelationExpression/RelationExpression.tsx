@@ -42,7 +42,7 @@ import { useBoxedExpressionEditorDispatch } from "../BoxedExpressionEditor/Boxed
 import { DEFAULT_EXPRESSION_NAME } from "../ExpressionDefinitionHeaderMenu";
 import "./RelationExpression.css";
 import _ from "lodash";
-import { BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
+import { BeeTableSelection, BeeTableSelectionActiveCell } from "../../selection/BeeTableSelectionContext";
 
 type ROWTYPE = RelationExpressionDefinitionRow;
 
@@ -311,25 +311,18 @@ export function RelationExpression(relationExpression: RelationExpressionDefinit
     return relationExpression.isNested ? BeeTableHeaderVisibility.LastLevel : BeeTableHeaderVisibility.AllLevels;
   }, [relationExpression.isNested]);
 
-  const allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
-    reactTableInstanceRowsLength: number,
-    column: ReactTable.ColumnInstance<any> | undefined,
-    columns: ReactTable.ColumnInstance<any>[] | undefined
-  ) => BeeTableOperation[] = useCallback(
+  const allowedOperations = useCallback(
     (
-      selectionStart: BeeTableSelectionActiveCell | undefined,
-      selectionEnd: BeeTableSelectionActiveCell | undefined,
+      selection: BeeTableSelection,
       reactTableInstanceRowsLength: number,
       column: ReactTable.ColumnInstance<any> | undefined,
       columns: ReactTable.ColumnInstance<any>[] | undefined
     ) => {
-      if (!selectionStart || !selectionEnd) {
+      if (!selection.selectionStart || !selection.selectionEnd) {
         return [];
       }
 
-      const columnIndex = selectionStart.columnIndex;
+      const columnIndex = selection.selectionStart.columnIndex;
 
       const columnCanBeDeleted = (columns?.length ?? 0) > 2; // That's a regular column and the rowIndex column
 
@@ -344,7 +337,7 @@ export function RelationExpression(relationExpression: RelationExpressionDefinit
 
       return [
         ...columnOperations,
-        ...(columnIndex > 0 && selectionStart.rowIndex >= 0
+        ...(columnIndex > 0 && selection.selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.SelectionCopy,
               BeeTableOperation.SelectionCut,
@@ -352,7 +345,7 @@ export function RelationExpression(relationExpression: RelationExpressionDefinit
               BeeTableOperation.SelectionReset,
             ]
           : []),
-        ...(selectionStart.rowIndex >= 0
+        ...(selection.selectionStart.rowIndex >= 0
           ? [
               BeeTableOperation.RowInsertAbove,
               BeeTableOperation.RowInsertBelow,

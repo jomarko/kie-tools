@@ -18,7 +18,7 @@ import * as React from "react";
 import * as ReactTable from "react-table";
 import { ResizerStopBehavior } from "../resizing/ResizingWidthsContext";
 import { BeeTableCellUpdate, BeeTableColumnUpdate } from "../table/BeeTable/BeeTableHeader";
-import { BeeTableSelectionActiveCell } from "../selection/BeeTableSelectionContext";
+import { BeeTableSelection } from "../selection/BeeTableSelectionContext";
 
 export interface BeeTableCellProps<R extends object> {
   data: readonly R[];
@@ -53,8 +53,7 @@ export interface BeeTableProps<R extends object> {
   /** Custom configuration for the table context menu */
   operationConfig?: BeeTableOperationConfig;
   allowedOperations: (
-    selectionStart: BeeTableSelectionActiveCell | undefined,
-    selectionEnd: BeeTableSelectionActiveCell | undefined,
+    selection: BeeTableSelection,
     reactTableInstanceRowsLength: number,
     column: ReactTable.ColumnInstance<any> | undefined,
     columns: ReactTable.ColumnInstance<any>[] | undefined

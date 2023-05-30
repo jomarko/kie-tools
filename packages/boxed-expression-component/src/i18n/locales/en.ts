@@ -81,7 +81,7 @@ export const en: BoxedExpressionEditorI18n = {
   methodSignature: "method signature",
   model: "model",
   name: "Name",
-  noOptionsAvailable: "No options available.",
+  noOperationsAvailable: "No operations available.",
   noParametersDefined: "No parameters have been defined.",
   outputClause: "OUTPUT CLAUSE",
   parameters: "PARAMETERS",
