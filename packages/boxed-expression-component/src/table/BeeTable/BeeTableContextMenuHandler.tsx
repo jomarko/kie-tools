@@ -28,7 +28,6 @@ import { assertUnreachable } from "../../expressions/ExpressionDefinitionRoot/Ex
 import "./BeeTableContextMenuHandler.css";
 import {
   BeeTableSelection,
-  BeeTableSelectionActiveCell,
   useBeeTableSelection,
   useBeeTableSelectionDispatch,
 } from "../../selection/BeeTableSelectionContext";
@@ -39,7 +38,7 @@ import CopyIcon from "@patternfly/react-icons/dist/js/icons/copy-icon";
 import PasteIcon from "@patternfly/react-icons/dist/js/icons/paste-icon";
 import { Divider } from "@patternfly/react-core/dist/js/components/Divider";
 import { useBoxedExpressionEditorI18n } from "../../i18n";
-import { EmptyState } from "@patternfly/react-core";
+import { EmptyState } from "@patternfly/react-core/dist/js/components/EmptyState";
 import { Title } from "@patternfly/react-core/dist/js/components/Title";
 
 export interface BeeTableContextMenuHandlerProps {
