@@ -172,10 +172,24 @@ export function usePotentialWaypointControls(
     }
 
     dmnEditorStoreApi.setState((state) => {
-      const dmnEdgeIndex = state.computed(state).indexedDrd().dmnEdgesByDmnElementRef.get(edgeId)?.index;
+      const dmnEdgesByDmnElementRef = state.computed(state).indexedDrd().dmnEdgesByDmnElementRef;
+      let dmnEdgeIndex = dmnEdgesByDmnElementRef.get(edgeId)?.index;
       if (dmnEdgeIndex === undefined) {
-        console.debug(`DMN MUTATION: DMNEdge for '${edgeId}' edge has missing index.`);
-        return;
+        // probably edge connecting external nodes
+        const shapeSourceId = state.computed(state).getDiagramData(externalModelsByNamespace).edgesById.get(edgeId)
+          ?.data?.dmnShapeSource?.["@_id"];
+        const shapeTargetId = state.computed(state).getDiagramData(externalModelsByNamespace).edgesById.get(edgeId)
+          ?.data?.dmnShapeTarget?.["@_id"];
+        dmnEdgesByDmnElementRef.forEach((edge, key) => {
+          if (edge["@_sourceElement"] === shapeSourceId && edge["@_targetElement"] === shapeTargetId) {
+            dmnEdgeIndex = edge.index;
+            return;
+          }
+        });
+        if (dmnEdgeIndex === undefined) {
+          console.debug(`DMN MUTATION: DMNEdge for '${edgeId}' edge has missing index.`);
+          return;
+        }
       }
       addEdgeWaypoint({
         definitions: state.dmn.model.definitions,

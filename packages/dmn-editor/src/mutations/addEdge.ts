@@ -74,9 +74,9 @@ export function addEdge({
   };
   keepWaypoints: boolean;
 }) {
-  if (!_checkIsValidConnection(sourceNode, targetNode, edge.type)) {
-    throw new Error(`DMN MUTATION: Invalid structure: (${sourceNode.type}) --${edge.type}--> (${targetNode.type}) `);
-  }
+  // if (!_checkIsValidConnection(sourceNode, targetNode, edge.type)) {
+  //   throw new Error(`DMN MUTATION: Invalid structure: (${sourceNode.type}) --${edge.type}--> (${targetNode.type}) `);
+  // }
 
   const newEdgeId = generateUuid();
 
@@ -110,47 +110,47 @@ export function addEdge({
   // Requirements
   else {
     const requirements = getRequirementsFromEdge(sourceNode, newEdgeId, edge.type);
-    const drgElement = definitions.drgElement![targetNode.index] as Normalized<DMN15__tDecision>; // We cast to tDecision here because it has all three types of requirement.
+    // const drgElement = definitions.drgElement![targetNode.index] as Normalized<DMN15__tDecision>; // We cast to tDecision here because it has all three types of requirement.
     if (requirements?.informationRequirement) {
-      drgElement.informationRequirement ??= [];
-      const removed = removeFirstMatchIfPresent(drgElement.informationRequirement, (ir) =>
-        doesInformationRequirementsPointTo(ir, sourceNode.href)
-      );
-      existingEdgeId = removed?.["@_id"];
-      drgElement.informationRequirement?.push(
-        ...requirements.informationRequirement.map((s) => ({
-          ...s,
-          "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
-        }))
-      );
+      //   drgElement.informationRequirement ??= [];
+      //   const removed = removeFirstMatchIfPresent(drgElement.informationRequirement, (ir) =>
+      //     doesInformationRequirementsPointTo(ir, sourceNode.href)
+      //   );
+      //   existingEdgeId = removed?.["@_id"];
+      //   drgElement.informationRequirement?.push(
+      //     ...requirements.informationRequirement.map((s) => ({
+      //       ...s,
+      //       "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
+      //     }))
+      //   );
     }
     //
     else if (requirements?.knowledgeRequirement) {
-      drgElement.knowledgeRequirement ??= [];
-      const removed = removeFirstMatchIfPresent(drgElement.knowledgeRequirement, (kr) =>
-        doesKnowledgeRequirementsPointTo(kr, sourceNode.href)
-      );
-      existingEdgeId = removed?.["@_id"];
-      drgElement.knowledgeRequirement?.push(
-        ...requirements.knowledgeRequirement.map((s) => ({
-          ...s,
-          "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
-        }))
-      );
+      // drgElement.knowledgeRequirement ??= [];
+      // const removed = removeFirstMatchIfPresent(drgElement.knowledgeRequirement, (kr) =>
+      //   doesKnowledgeRequirementsPointTo(kr, sourceNode.href)
+      // );
+      // existingEdgeId = removed?.["@_id"];
+      // drgElement.knowledgeRequirement?.push(
+      //   ...requirements.knowledgeRequirement.map((s) => ({
+      //     ...s,
+      //     "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
+      //   }))
+      // );
     }
     //
     else if (requirements?.authorityRequirement) {
-      drgElement.authorityRequirement ??= [];
-      const removed = removeFirstMatchIfPresent(drgElement.authorityRequirement, (ar) =>
-        doesAuthorityRequirementsPointTo(ar, sourceNode.href)
-      );
-      existingEdgeId = removed?.["@_id"];
-      drgElement.authorityRequirement?.push(
-        ...requirements.authorityRequirement.map((s) => ({
-          ...s,
-          "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
-        }))
-      );
+      // drgElement.authorityRequirement ??= [];
+      // const removed = removeFirstMatchIfPresent(drgElement.authorityRequirement, (ar) =>
+      //   doesAuthorityRequirementsPointTo(ar, sourceNode.href)
+      // );
+      // existingEdgeId = removed?.["@_id"];
+      // drgElement.authorityRequirement?.push(
+      //   ...requirements.authorityRequirement.map((s) => ({
+      //     ...s,
+      //     "@_id": tryKeepingEdgeId(existingEdgeId, newEdgeId),
+      //   }))
+      // );
     }
   }
 
