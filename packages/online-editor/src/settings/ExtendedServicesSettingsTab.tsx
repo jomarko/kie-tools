@@ -33,18 +33,16 @@ export function ExtendedServicesSettingsTab() {
   const { settings } = useSettings();
   const settingsDispatch = useSettingsDispatch();
   const extendedServices = useExtendedServices();
-  const [host, setHost] = useState(settings.extendedServices.host);
-  const [port, setPort] = useState(settings.extendedServices.port);
+  const [href, setHref] = useState(settings.extendedServices.href);
 
   const onSubmit = useCallback(
     (e: any) => {
       e.preventDefault();
       settingsDispatch.set((settings) => {
-        settings.extendedServices.host = host;
-        settings.extendedServices.port = port;
+        settings.extendedServices.href = href;
       });
     },
-    [host, port, settingsDispatch]
+    [href, settingsDispatch]
   );
 
   return (
@@ -75,38 +73,18 @@ export function ExtendedServicesSettingsTab() {
                 isRequired={true}
                 helperTextInvalid={""}
                 validated={"default"}
-                label={"Host"}
-                fieldId={"host-input"}
+                label={"Href"}
+                fieldId={"href-input"}
               >
                 <InputGroup>
                   <TextInput
-                    id="host-input"
-                    name="host"
-                    aria-describedby="host-text-input-helper"
+                    id="href-input"
+                    name="href"
+                    aria-describedby="href-text-input-helper"
                     placeholder={""}
                     validated={"default"}
-                    value={host}
-                    onChange={setHost}
-                    autoFocus={true}
-                  />
-                </InputGroup>
-              </FormGroup>
-              <FormGroup
-                isRequired={false}
-                helperTextInvalid={""}
-                validated={"default"}
-                label={"Port"}
-                fieldId={"port-input"}
-              >
-                <InputGroup>
-                  <TextInput
-                    id="port-input"
-                    name="port"
-                    aria-describedby="port-text-input-helper"
-                    placeholder={""}
-                    validated={"default"}
-                    value={port}
-                    onChange={setPort}
+                    value={href}
+                    onChange={setHref}
                     autoFocus={true}
                   />
                 </InputGroup>

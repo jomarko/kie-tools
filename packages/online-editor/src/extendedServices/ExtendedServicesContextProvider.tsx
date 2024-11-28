@@ -25,6 +25,7 @@ import { ExtendedServicesClient } from "./ExtendedServicesClient";
 import { DependentFeature, ExtendedServicesContext } from "./ExtendedServicesContext";
 import { ExtendedServicesModal } from "./ExtendedServicesModal";
 import { ExtendedServicesStatus } from "./ExtendedServicesStatus";
+import { useEnv } from "../env/hooks/EnvContext";
 
 interface Props {
   children: React.ReactNode;
@@ -38,20 +39,17 @@ export function ExtendedServicesContextProvider(props: Props) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [installTriggeredBy, setInstallTriggeredBy] = useState<DependentFeature | undefined>(undefined);
   const [outdated, setOutdated] = useState(false);
+  const { env } = useEnv();
 
   const config = useMemo(() => {
     try {
-      const url = new URL(settings.extendedServices.host);
-      const port = settings.extendedServices.port;
-      if (port) {
-        url.port = port;
-      }
+      const url = new URL(settings.extendedServices.href);
 
-      return new ExtendedServicesConfig(url.href, url.port);
+      return new ExtendedServicesConfig(url.href);
     } catch (error) {
-      return new ExtendedServicesConfig(settings.extendedServices.host ?? "", settings.extendedServices.port ?? "");
+      return new ExtendedServicesConfig(env.KIE_SANDBOX_EXTENDED_SERVICES_URL);
     }
-  }, [settings.extendedServices.port, settings.extendedServices.host]);
+  }, [settings.extendedServices.href]);
 
   const bridge = useMemo(() => new ExtendedServicesBridge(config.url.ping), [config]);
   const version = useMemo(() => process.env.WEBPACK_REPLACE__extendedServicesCompatibleVersion ?? "0.0.0", []);
@@ -117,15 +115,12 @@ export function ExtendedServicesContextProvider(props: Props) {
   );
 }
 export class ExtendedServicesConfig {
-  constructor(
-    public readonly href: string,
-    public readonly port: string
-  ) {}
+  constructor(public readonly href: string) {}
 
   public get url() {
     return {
       jitExecutor: `${this.href}`,
-      ping: `${this.href.endsWith("/") ? this.href : this.href + ":" + this.port + "/"}ping`,
+      ping: `${this.href.endsWith("/") ? this.href : this.href + "/"}ping`,
     };
   }
 }

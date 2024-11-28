@@ -261,7 +261,7 @@ export function ExtendedServicesModal() {
                   <TextContent>
                     <Text component={TextVariants.p} className={"kogito--code"}>
                       /Applications/KIE\ Tooling\ Extended\ Services.app/Contents/MacOs/kogito -p{" "}
-                      {extendedServices.config.port}
+                      {extendedServices.config.href}
                     </Text>
                   </TextContent>
                   <br />
@@ -276,7 +276,7 @@ export function ExtendedServicesModal() {
       i18n,
       extendedServices.outdated,
       extendedServices.status,
-      extendedServices.config.port,
+      extendedServices.config.href,
       downloadExtendedServicesUrl,
       KIE_SANDBOX_EXTENDED_SERVICES_MACOS_DMG,
       KIE_SANDBOX_EXTENDED_SERVICES_MACOS_APP,
@@ -421,7 +421,7 @@ export function ExtendedServicesModal() {
                   <TextContent>
                     <Text component={TextVariants.p} className={"kogito--code"}>
                       &quot;kie-sandbox-extended-services_windows_{extendedServices.version}.exe&quot; -p{" "}
-                      {extendedServices.config.port}
+                      {new URL(extendedServices.config.href).port}
                     </Text>
                   </TextContent>
                   <br />
@@ -437,7 +437,7 @@ export function ExtendedServicesModal() {
       extendedServices.outdated,
       extendedServices.status,
       extendedServices.version,
-      extendedServices.config.port,
+      extendedServices.config.href,
       downloadExtendedServicesUrl,
       KIE_SANDBOX_EXTENDED_SERVICES_WINDOWS_EXE,
     ]
@@ -576,7 +576,7 @@ export function ExtendedServicesModal() {
                 <br />
                 <TextContent>
                   <Text component={TextVariants.p} className={"kogito--code"}>
-                    ./kie-sandbox-extended-services -p {extendedServices.config.port}
+                    ./kie-sandbox-extended-services -p {new URL(extendedServices.config.href).port}
                   </Text>
                 </TextContent>
                 <br />
@@ -590,7 +590,7 @@ export function ExtendedServicesModal() {
       i18n,
       extendedServices.outdated,
       extendedServices.status,
-      extendedServices.config.port,
+      extendedServices.config.href,
       downloadExtendedServicesUrl,
       KIE_SANDBOX_EXTENDED_SERVICES_LINUX_TAG_GZ,
       KIE_SANDBOX_EXTENDED_SERVICES_BINARIES,
@@ -856,12 +856,14 @@ function ExtendedServicesPortForm() {
   const settingsDispatch = useSettingsDispatch();
   const { i18n } = useOnlineI18n();
 
+  const configPort = new URL(config.href).port;
+
   return (
     <>
       <Text component={TextVariants.p}>
         <I18nWrapped
           components={{
-            port: <Text className={"kogito--code"}>{config.port}</Text>,
+            port: <Text className={"kogito--code"}>{configPort}</Text>,
           }}
         >
           {i18n.dmnRunner.modal.wizard.advancedSettings.title}
@@ -873,18 +875,18 @@ function ExtendedServicesPortForm() {
           fieldId={"extended-services-port"}
           label={i18n.dmnRunner.modal.wizard.advancedSettings.label}
           validated={
-            config.port === "" || parseInt(config.port, 10) < 0 || parseInt(config.port, 10) > 65353
-              ? "error"
-              : "success"
+            configPort === "" || parseInt(configPort, 10) < 0 || parseInt(configPort, 10) > 65353 ? "error" : "success"
           }
           helperTextInvalid={i18n.dmnRunner.modal.wizard.advancedSettings.helperTextInvalid}
         >
           <TextInput
-            value={config.port}
+            value={configPort}
             type={"number"}
             onChange={(value) =>
               settingsDispatch.set((settings) => {
-                settings.extendedServices.port = `${value}`;
+                const newConfigUrl = new URL(config.href);
+                newConfigUrl.port = value;
+                settings.extendedServices.href = newConfigUrl.href;
               })
             }
           />

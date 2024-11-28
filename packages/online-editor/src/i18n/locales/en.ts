@@ -561,7 +561,7 @@ export const en: OnlineI18n = {
         advancedSettings: {
           title: [
             `The default ${en_common.names.extendedServices} port is `,
-            wrapped("port"),
+            "21345",
             `. If you're already using this port for another application, you can change the port used to connect with the ${en_common.names.extendedServices}.`,
           ],
           label: "Port",

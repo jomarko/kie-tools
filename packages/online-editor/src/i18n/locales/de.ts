@@ -577,7 +577,7 @@ export const de: OnlineI18n = {
         advancedSettings: {
           title: [
             `Der Standard-Port von ${de_common.names.extendedServices} ist `,
-            wrapped("port"),
+            "21345",
             `. Wenn Sie diesen Port bereits für eine andere Anwendung verwenden, können Sie den Port, der für die Verbindung mit ${de_common.names.extendedServices} verwendet wird, ändern.`,
           ],
           label: " Port",

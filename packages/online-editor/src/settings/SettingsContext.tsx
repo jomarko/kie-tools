@@ -29,11 +29,7 @@ import { useEnv } from "../env/hooks/EnvContext";
 import { QueryParams } from "../navigation/Routes";
 import { useQueryParams } from "../queryParams/QueryParamsContext";
 import { SettingsTabs } from "./SettingsModalBody";
-import { getCookie } from "../cookies";
 import { useEditorEnvelopeLocator } from "../envelopeLocator/hooks/EditorEnvelopeLocatorContext";
-
-export const EXTENDED_SERVICES_HOST_COOKIE_NAME = "kie-tools-COOKIE__kie-sandbox-extended-services--host";
-export const EXTENDED_SERVICES_PORT_COOKIE_NAME = "kie-tools-COOKIE__kie-sandbox-extended-services--port";
 
 export type SettingsContextType = {
   settings: {
@@ -42,8 +38,7 @@ export type SettingsContextType = {
       url: string;
     };
     extendedServices: {
-      host: string;
-      port: string;
+      href: string;
     };
     editors: {
       useLegacyDmnEditor: boolean;
@@ -144,10 +139,9 @@ export function SettingsContextProvider(props: PropsWithChildren<{}>) {
 
             const envExtendedServicesUrl = new URL(env.KIE_SANDBOX_EXTENDED_SERVICES_URL);
             // 0.0.0.0 is "equivalent" to localhost, but browsers don't like having mixed http/https urls with the exception of localhost
-            const envExtendedServicesHost = `${envExtendedServicesUrl.protocol}//${
-              envExtendedServicesUrl.hostname === "0.0.0.0" ? "localhost" : envExtendedServicesUrl.hostname
-            }`;
-            const envExtendedServicesPort = envExtendedServicesUrl.port;
+            if (envExtendedServicesUrl.hostname === "0.0.0.0") {
+              envExtendedServicesUrl.hostname = "localhost";
+            }
 
             await persistSettings({
               version: SETTINGS_FILE_LATEST_VERSION,
@@ -155,8 +149,7 @@ export function SettingsContextProvider(props: PropsWithChildren<{}>) {
                 url: env.KIE_SANDBOX_CORS_PROXY_URL,
               },
               extendedServices: {
-                host: getCookie(EXTENDED_SERVICES_HOST_COOKIE_NAME) ?? envExtendedServicesHost,
-                port: getCookie(EXTENDED_SERVICES_PORT_COOKIE_NAME) ?? envExtendedServicesPort,
+                href: envExtendedServicesUrl.href,
               },
               editors: {
                 useLegacyDmnEditor: false,
